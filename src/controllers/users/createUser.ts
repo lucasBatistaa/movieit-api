@@ -1,10 +1,12 @@
-import UserModel from "../../models/userModel"
+import { Request, Response } from 'express'
 import { v4 as uuid } from "uuid"
 import bcrypt from 'bcrypt'
 
-const createUser = async (req, res) => {
+import { UserModel, userSchema } from "../../models/userModel"
+
+export default async function CreateUser(req: Request, res: Response) {
     try {
-        const dataUser = req.body
+        const dataUser = userSchema.parse(req.body)
 
         dataUser.public_id = uuid()
         dataUser.password = bcrypt.hashSync(dataUser.password, 10)
@@ -17,7 +19,9 @@ const createUser = async (req, res) => {
         })
     } catch (error) {
         console.log(error)
+
+        return res.status(500).json({
+            message: 'Error'
+        })
     }
 }
-
-export default createUser

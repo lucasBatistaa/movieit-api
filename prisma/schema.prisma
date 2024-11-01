@@ -11,9 +11,76 @@ datasource db {
 }
 
 model User {
-  id        Int    @id @default(autoincrement())
-  public_id String @unique
-  email     String @unique
+  id        Int      @id @default(autoincrement())
+  publicId  String?   @unique
+  email     String   @unique
   name      String
   password  String
+  createdAt DateTime @default(now())
+
+  watchlist   Watchlist[]
+  timeline    Timeline[]
+  review      Review[]
+  connections Connection[]
+
+  @@map("users")
+}
+
+model Watchlist {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  movieId   Int
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@map("watchlists")
+}
+
+model Movie {
+  id Int @id
+
+  watchlist Watchlist[]
+  timeline  Timeline[]
+  review    Review[]
+
+  @@map("movies")
+}
+
+model Timeline {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  movieId   Int
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@map("timelines")
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  movieId     Int
+  title       String?
+  description String
+  createdAt   DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@map("reviews")
+}
+
+model Connection {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  friendId  Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  
+  @@map("connections")
 }
