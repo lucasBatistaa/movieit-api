@@ -6,9 +6,10 @@ import { UserModel, userSchema } from "../../models/userModel"
 
 export default async function CreateUser(req: Request, res: Response) {
     try {
-        const dataUser = userSchema.parse(req.body)
+        const publicId = uuid()
+        const dataToParse = { publicId, ...req.body }
+        const dataUser = userSchema.parse(dataToParse)
 
-        dataUser.public_id = uuid()
         dataUser.password = bcrypt.hashSync(dataUser.password, 10)
 
         const userCreated = await UserModel.create(dataUser)
