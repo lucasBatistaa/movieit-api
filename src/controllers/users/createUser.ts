@@ -2,17 +2,24 @@ import { Request, Response } from 'express'
 import { v4 as uuid } from "uuid"
 import bcrypt from 'bcrypt'
 
-import { UserModel, userSchema } from "../../models/userModel"
+import { UserModel, validateUserToCreate } from "../../models/userModel"
 
 export default async function CreateUser(req: Request, res: Response) {
     try {
-        const publicId = uuid()
-        const dataToParse = { publicId, ...req.body }
-        const dataUser = userSchema.parse(dataToParse)
+        const user = req.body
+        const userValidated = validateUserToCreate(user)
+        
+        if (userValidated.error) {
+            return res.status(400).json({
+                error: 'Erro no login! Verifiquen os dados!',
+                fieldErrors: userValidated.error.flatten().fieldErrors
+            })
+        }
 
-        dataUser.password = bcrypt.hashSync(dataUser.password, 10)
+        userValidated.data.publicId = uuid()
+        userValidated.data.password = await bcrypt.hash(userValidated.data.password, 10)
 
-        const userCreated = await UserModel.create(dataUser)
+        const userCreated = await UserModel.create(userValidated.data)
 
         return res.status(200).json({
             message: 'User created!',
