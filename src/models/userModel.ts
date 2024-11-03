@@ -59,5 +59,15 @@ export const UserModel = {
         })
 
         return user
+    },
+
+    emailExists: async (email: string) => {
+        const user = await prisma.user.findUnique({
+            where: {
+                email
+            }
+        })
+
+        return user
     }
 }
