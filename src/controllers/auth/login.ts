@@ -2,7 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
-import { UserModel, validateUserToLogin } from "../../models/userModel";
+import { UserModel } from "../../models/userModel";
+import { validateUserToLogin } from "../../utils/userSchemaZod";
+
 import { SECRET_KEY } from "../../config";
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
