@@ -12,16 +12,17 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  publicId  String?   @unique
+  publicId  String?  @unique
   email     String   @unique
-  name      String
+  username  String   @unique
   password  String
   createdAt DateTime @default(now())
 
   watchlist   Watchlist[]
-  timeline    Timeline[]
+  watched     Watched[]
   review      Review[]
   connections Connection[]
+  rating      Rating[]
 
   @@map("users")
 }
@@ -29,33 +30,49 @@ model User {
 model Watchlist {
   id        Int      @id @default(autoincrement())
   userId    Int
-  movieId   Int
+  title     String
   createdAt DateTime @default(now())
 
-  user  User  @relation(fields: [userId], references: [id])
-  movie Movie @relation(fields: [movieId], references: [id])
+  user   User               @relation(fields: [userId], references: [id])
+  movies MovieOnWatchlist[]
 
   @@map("watchlists")
 }
 
-model Movie {
-  id Int @id
+model MovieOnWatchlist {
+  id          Int     @id @default(autoincrement())
+  movieId     Int
+  watchlistId Int
+  isWatched   Boolean
 
-  watchlist Watchlist[]
-  timeline  Timeline[]
-  review    Review[]
+  movie     Movie     @relation(fields: [movieId], references: [id])
+  watchlist Watchlist @relation(fields: [movieId], references: [id])
+
+  @@map("movie_on_watchlist")
+}
+
+model Movie {
+  id     Int    @id
+  title  String
+  poster String
+
+  watched          Watched[]
+  review           Review[]
+  movieOnWatchlist MovieOnWatchlist[]
 
   @@map("movies")
 }
 
-model Timeline {
+model Watched {
   id        Int      @id @default(autoincrement())
   userId    Int
   movieId   Int
+  ratingId  Int
   createdAt DateTime @default(now())
 
-  user  User  @relation(fields: [userId], references: [id])
-  movie Movie @relation(fields: [movieId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  movie  Movie  @relation(fields: [movieId], references: [id])
+  rating Rating @relation(fields: [ratingId], references: [id])
 
   @@map("timelines")
 }
@@ -75,12 +92,25 @@ model Review {
 }
 
 model Connection {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  friendId  Int
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  friendId   Int
+  isAccepted Boolean
+  createdAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
-  
+
   @@map("connections")
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  movieId   Int
+  createdAt DateTime @default(now())
+
+  user    User      @relation(fields: [userId], references: [id])
+  Watched Watched[]
+
+  @@map("ratings")
 }
