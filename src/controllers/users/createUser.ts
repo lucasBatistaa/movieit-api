@@ -2,13 +2,12 @@ import { Request, Response } from 'express'
 import { v4 as uuid } from "uuid"
 import bcrypt from 'bcrypt'
 
-import { UserModel, validateUserToCreate } from "../../models/userModel"
+import { UserModel } from "../../models/userModel"
+import { validateUserToCreate } from '../../utils/userSchemaZod'
 
 export default async function CreateUser(req: Request, res: Response) {
     try {
         const user = req.body
-
-        console.log(user)
         const userValidated = validateUserToCreate(user)
         
         if (userValidated.error) {
