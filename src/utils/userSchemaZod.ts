@@ -13,6 +13,12 @@ export const userSchemaValidateToCreate = userSchema.partial({
     publicId: true,
 })
 
+export const validateUserToCreate = (user: UserCreateValidate) => {
+    return userSchemaValidateToCreate.safeParse(user)
+}
+
+export type UserCreateValidate = z.infer<typeof userSchemaValidateToCreate>
+
 export const userSchemaValidateToLogin = userSchema.partial({
     id: true,
     publicId: true,
@@ -23,15 +29,12 @@ export const userSchemaToCreate = userSchema.partial({
     id: true,
 })
 
-export const validateUserToCreate = (user: UserCreateValidate) => {
-    return userSchemaValidateToCreate.safeParse(user)
-}
+
 
 export const validateUserToLogin = (user: UserLoginValidate) => {
     return userSchemaValidateToLogin.safeParse(user)
 }
 
 export type User = z.infer<typeof userSchema>
-export type UserCreateValidate = z.infer<typeof userSchemaValidateToCreate>
 export type UserLoginValidate = z.infer<typeof userSchemaValidateToLogin>
 export type UserCreate = z.infer<typeof userSchemaToCreate>

@@ -1,28 +1,24 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { v4 as uuid } from "uuid"
 import bcrypt from 'bcrypt'
 
 import { UserModel } from "../../models/userModel"
 import { validateUserToCreate } from '../../utils/userSchemaZod'
+import { ClientError } from '../../errors/client-error'
 
-export default async function CreateUser(req: Request, res: Response) {
+export default async function createUser(req: Request, res: Response, next: NextFunction) {
     try {
         const user = req.body
         const userValidated = validateUserToCreate(user)
         
-        if (userValidated.error) {
-            return res.status(400).json({
-                error: 'Erro na criação do usuário! Verifique todos os dados!',
-                fieldErrors: userValidated.error.flatten().fieldErrors
-            })
+        if (!userValidated.success) {
+            return next(userValidated.error)
         }
 
         const emailExists = await UserModel.emailExists(userValidated.data.email)
 
         if (emailExists) {
-            return res.status(400).json({
-                error: 'Já existe uma conta com este email!',
-            })
+            return next(new ClientError('Este e-mail já possui uma conta!'))
         }
 
         userValidated.data.publicId = uuid()
@@ -30,15 +26,15 @@ export default async function CreateUser(req: Request, res: Response) {
 
         const userCreated = await UserModel.create(userValidated.data)
 
-        return res.status(200).json({
+        if (!userCreated) {
+            return next(new ClientError('Erro ao criar usuário!'))
+        }
+
+        res.status(200).json({
             message: 'Usuário criado!',
             userCreated
         })
     } catch (error) {
-        console.log(error)
-
-        return res.status(500).json({
-            message: 'Server error!'
-        })
+        next(error)
     }
 }

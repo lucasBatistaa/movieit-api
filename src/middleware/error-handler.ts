@@ -9,26 +9,16 @@ export const errorHandler: ErrorRequestHandler = async (err, req, res, next) => 
             message: 'Invalid Input',
             errors: err.flatten().fieldErrors,
         })
-
-        return
-    }
-
-    if (err instanceof ClientError) {
+    } else if (err instanceof ClientError) {
         res.status(400).json({
             status: "fail",
             message: err.message
         })
-
-        return
+    } else {
+        res.status(500).json({
+            status: "error",
+            message: 'Internal server error',
+            code: "ERR500"
+        })
     }
-    
-    // next()
-
-    res.status(500).json({
-        status: "error",
-        message: 'Internal server error',
-        code: "ERR500"
-    })
-
-    return
 }

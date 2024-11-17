@@ -1,8 +1,8 @@
 import { prisma } from "../lib/prismaClient"
-import { UserCreate } from "../utils/userSchemaZod"
+import { UserCreate, UserCreateValidate } from "../utils/userSchemaZod"
 
 export const UserModel = {
-    create: async (dataUser: UserCreate) => {
+    create: async (dataUser: UserCreateValidate) => {
 
         const user = await prisma.user.create({
             data: dataUser,
